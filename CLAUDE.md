@@ -38,6 +38,8 @@ node ace make:test --suite=functional # scaffolding de un fichero de test
 
 Ojo con la BD en tests: `config/database.ts` define una única conexión SQLite apuntando a `app.tmpPath('db.sqlite3')` sin override por entorno, así que las suites functional pegan contra el **mismo fichero** que el servidor de desarrollo. `.env.test` solo cambia `SESSION_DRIVER=memory`. Si añades tests que escriben, aísla con los hooks de `testUtils.db()` (truncate / transacción global) o el estado se filtra entre runs.
 
+El contrato de la API también está versionado: `docs/api/openapi.json`. `npm run openapi:generate` lo reescribe con el mismo documento que sirve `/api.json`; `npm run openapi:check` lo regenera en un directorio temporal, lo compara con el versionado y sale con código 1 listando las diferencias si no coinciden (solo compara, nunca escribe). Los dos comandos viven en `app/openapi/commands/` y se registran desde `adonisrc.ts`, no en `commands/`: ace valida esa carpeta con `jsonschema`, que desde Node 24.21 lanza `Invalid URL` y deja sin arrancar cualquier comando propio.
+
 Otros comandos útiles: `node ace list:routes`, `node ace make:controller|model|migration|validator|transformer|service`, `node ace migration:fresh`, `node ace repl`.
 
 ### Frontend (`cd frontend`)
