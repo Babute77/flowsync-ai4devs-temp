@@ -1,0 +1,39 @@
+name: openapi-check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Solo lectura del repositorio: el trabajo no escribe, ni comenta, ni publica.
+permissions:
+  contents: read
+
+jobs:
+  openapi-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      # El comando arranca la aplicación, y `start/env.ts` valida el entorno al
+      # arrancar. La clave es desechable: solo existe en este runner.
+      - name: Preparar el entorno
+        run: |
+          cp .env.example .env
+          node ace generate:key
+
+      - run: npm run openapi:check
